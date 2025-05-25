@@ -1,8 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  AppBar, Toolbar, Typography, Container, Paper, ListSubheader, Alert, IconButton, Divider, Box, Grid, Button, ListItemAvatar, Avatar, Select, MenuItem, List, ListItem, ListItemText, Autocomplete, TextField
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  Paper,
+  ListSubheader,
+  Alert,
+  IconButton,
+  Divider,
+  Box,
+  Grid,
+  Button,
+  ListItemAvatar,
+  Avatar,
+  Select,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemText,
+  Autocomplete,
+  TextField,
 } from "@mui/material";
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -12,17 +32,34 @@ import { useWindowSize } from "react-use";
 import { Wheel } from "react-custom-roulette";
 
 export type Items = {
-  mainhand: {},
+  armor: {};
+  bag: {};
+  cape: {};
+  food: {};
+  head: {};
+  mainhand: {};
+  offhand: {};
+  potion: {};
+  shoes: {};
 };
 
 const defaultItems: Items = {
+  armor: {},
+  bag: {},
+  cape: {},
+  food: {},
+  head: {},
   mainhand: {},
+  offhand: {},
+  potion: {},
+  shoes: {},
 };
 
-const lang = 'JA-JP';
+const lang = "JA-JP";
 
 type Item = {
-  uniqueName: string;[key: string]: any
+  uniqueName: string;
+  [key: string]: any;
 };
 
 function App() {
@@ -48,10 +85,12 @@ function App() {
 
   const handleAddItem = () => {
     if (!selectedType || !selectedItem) return;
-    const already = addedItems.some(item => item.uniqueName === selectedItem);
+    const already = addedItems.some((item) => item.uniqueName === selectedItem);
     if (already) return;
 
-    const newItem = items[selectedType].find((item: Item) => item.uniqueName === selectedItem);
+    const newItem = items[selectedType].find(
+      (item: Item) => item.uniqueName === selectedItem,
+    );
     newItem.size = selectedSize;
     if (newItem) setAddedItems([...addedItems, newItem]);
   };
@@ -71,15 +110,15 @@ function App() {
       const results = await Promise.all(
         Object.keys(items).map(async (item) => {
           const res = await fetch(
-            `https://muutmoku.github.io/ao-item-snapshot/data/latest/${item}.json`
+            `https://muutmoku.github.io/ao-item-snapshot/data/latest/${item}.json`,
           );
           const data = await res.json();
-          const parsedData = (data as Item[]).map(item => ({
+          const parsedData = (data as Item[]).map((item) => ({
             uniqueName: item.uniqueName,
-            localizedNames: item.localizedNames
+            localizedNames: item.localizedNames,
           }));
           return [item, parsedData] as [string, any];
-        })
+        }),
       );
       const newItems = Object.fromEntries(results);
       setItems(newItems);
@@ -101,9 +140,7 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-            <Typography variant="h6">
-              Albion Online Item Roulette
-            </Typography>
+            <Typography variant="h6">Albion Online Item Roulette</Typography>
           </Box>
           <IconButton
             size="large"
@@ -134,13 +171,29 @@ function App() {
 
             <Autocomplete
               options={selectedItemList}
-              getOptionLabel={option => option.localizedNames[lang] || option.uniqueName}
-              value={selectedItemList.find(item => item.uniqueName === selectedItem) || null}
-              onChange={(_, newValue) => setSelectedItem(newValue ? newValue.uniqueName : "")}
+              getOptionLabel={(option) =>
+                option.localizedNames[lang] || option.uniqueName
+              }
+              value={
+                selectedItemList.find(
+                  (item) => item.uniqueName === selectedItem,
+                ) || null
+              }
+              onChange={(_, newValue) =>
+                setSelectedItem(newValue ? newValue.uniqueName : "")
+              }
               renderInput={(params) => (
-                <TextField {...params} label="Search" variant="outlined" fullWidth sx={{ mb: 2 }} />
+                <TextField
+                  {...params}
+                  label="Search"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ mb: 2 }}
+                />
               )}
-              isOptionEqualToValue={(option, value) => option.uniqueName === value.uniqueName}
+              isOptionEqualToValue={(option, value) =>
+                option.uniqueName === value.uniqueName
+              }
             />
 
             <TextField
@@ -148,7 +201,10 @@ function App() {
               type="number"
               value={selectedSize}
               onChange={(e) => {
-                const val = Math.max(1, Math.floor(Number(e.target.value) || 1));
+                const val = Math.max(
+                  1,
+                  Math.floor(Number(e.target.value) || 1),
+                );
                 setSelectedSize(val);
               }}
               inputProps={{
@@ -163,18 +219,12 @@ function App() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddItem}
-            >Add</Button>
-            <Box mt={2} />
-            <Paper
-              variant="outlined"
             >
-              <List
-                subheader={
-                  <ListSubheader>
-                    Added items
-                  </ListSubheader>
-                }
-              >
+              Add
+            </Button>
+            <Box mt={2} />
+            <Paper variant="outlined">
+              <List subheader={<ListSubheader>Added items</ListSubheader>}>
                 {addedItems.map((addedItem: Item, idx: number) => (
                   <>
                     <ListItem
@@ -184,7 +234,12 @@ function App() {
                           edge="end"
                           aria-label="delete"
                           onClick={() =>
-                            setAddedItems(prev => prev.filter(item => item.uniqueName !== addedItem.uniqueName))
+                            setAddedItems((prev) =>
+                              prev.filter(
+                                (item) =>
+                                  item.uniqueName !== addedItem.uniqueName,
+                              ),
+                            )
                           }
                         >
                           <DeleteIcon />
@@ -192,7 +247,11 @@ function App() {
                       }
                     >
                       <ListItemAvatar>
-                        <Avatar variant="square" alt={addedItem.localizedNames[lang]} src={`https://render.albiononline.com/v1/item/${addedItem.uniqueName}.png`} />
+                        <Avatar
+                          variant="square"
+                          alt={addedItem.localizedNames[lang]}
+                          src={`https://render.albiononline.com/v1/item/${addedItem.uniqueName}.png`}
+                        />
                       </ListItemAvatar>
                       <ListItemText primary={addedItem.localizedNames[lang]} />
                       <TextField
@@ -202,11 +261,14 @@ function App() {
                         value={addedItem.size ?? 1}
                         inputProps={{ min: 1, step: 1 }}
                         onChange={(e) => {
-                          const newSize = Math.max(1, Math.floor(Number(e.target.value) || 1));
-                          setAddedItems(prev =>
+                          const newSize = Math.max(
+                            1,
+                            Math.floor(Number(e.target.value) || 1),
+                          );
+                          setAddedItems((prev) =>
                             prev.map((item, i) =>
-                              i === idx ? { ...item, size: newSize } : item
-                            )
+                              i === idx ? { ...item, size: newSize } : item,
+                            ),
                           );
                         }}
                         sx={{ width: 80, ml: 2 }}
@@ -219,52 +281,52 @@ function App() {
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
-            {
-              !mustSpin && prizeNumber >= 0 ?
-                <>
-                  <Confetti width={width} height={height} numberOfPieces={180} />
-                  <Alert
-                    variant="outlined" severity="info"
-                  >
-                    {addedItems[prizeNumber]?.localizedNames[lang]}
-                  </Alert>
-                </>
-                : <></>
-            }
-            {
-              addedItems.length ?
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                  width="100%"
+            {!mustSpin && prizeNumber >= 0 ? (
+              <>
+                <Confetti width={width} height={height} numberOfPieces={180} />
+                <Alert variant="outlined" severity="info">
+                  {addedItems[prizeNumber]?.localizedNames[lang]}
+                </Alert>
+              </>
+            ) : (
+              <></>
+            )}
+            {addedItems.length ? (
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                width="100%"
+              >
+                <Wheel
+                  mustStartSpinning={mustSpin}
+                  prizeNumber={prizeNumber}
+                  data={addedItems?.map((item) => ({
+                    option: item.uniqueName,
+                    image: {
+                      uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
+                      offsetY: 100,
+                      sizeMultiplier: 1 - addedItems.length * 0.05,
+                    },
+                    optionSize: item.size,
+                  }))}
+                  onStopSpinning={() => setMustSpin(false)}
+                  backgroundColors={backgroundColors}
+                  textColors={["#fff"]}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleSpinClick}
+                  style={{ marginTop: "24px" }}
                 >
-                  <Wheel
-                    mustStartSpinning={mustSpin}
-                    prizeNumber={prizeNumber}
-                    data={addedItems?.map(item => ({
-                      option: item.uniqueName,
-                      image: {
-                        uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
-                        offsetY: 100,
-                        sizeMultiplier: 1 - (addedItems.length * 0.05)
-                      },
-                      optionSize: item.size
-                    }
-                    ))}
-                    onStopSpinning={() => setMustSpin(false)}
-                    backgroundColors={backgroundColors}
-                    textColors={["#fff"]}
-                  />
-                  <Button variant="contained"
-                    onClick={handleSpinClick} style={{ marginTop: "24px" }}>
-                    SPIN
-                  </Button>
-                </Box>
-                : <></>
-            }
+                  SPIN
+                </Button>
+              </Box>
+            ) : (
+              <></>
+            )}
           </Grid>
-        </Grid >
+        </Grid>
       </Container>
     </>
   );
