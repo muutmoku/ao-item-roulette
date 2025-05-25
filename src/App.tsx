@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  AppBar, Toolbar, Typography, IconButton, Box, Grid, Button, Select, MenuItem, List, ListItem, ListItemText
+  AppBar, Toolbar, Typography, Container, Paper, ListSubheader, Alert, IconButton, Divider, Box, Grid, Button, ListItemAvatar, Avatar, Select, MenuItem, List, ListItem, ListItemText, Autocomplete, TextField
 } from "@mui/material";
+import { useTheme } from '@mui/material/styles';
 import MenuIcon from "@mui/icons-material/Menu";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 import { Wheel } from "react-custom-roulette";
 
 export type Items = {
@@ -25,15 +28,32 @@ type Item = {
 function App() {
   const [items, setItems] = useState<any>(defaultItems);
   const [mustSpin, setMustSpin] = useState(false);
-  const [prizeNumber, setPrizeNumber] = useState(0);
+  const [prizeNumber, setPrizeNumber] = useState(-1);
   const [addedItems, setAddedItems] = useState<Item[]>([]);
   const [selectedItemList, setselectedItemList] = useState<Item[]>([]);
   const [selectedType, setSelectedType] = useState<any>([]);
   const [selectedItem, setSelectedItem] = useState<any>("");
-  
+  const [selectedSize, setSelectedSize] = useState<number>(1);
+  const { width, height } = useWindowSize();
+
+  const theme = useTheme();
+  const backgroundColors = [
+    theme.palette.primary.main,
+    theme.palette.secondary.main,
+    theme.palette.success.main,
+    theme.palette.error.main,
+    theme.palette.warning.main,
+    theme.palette.info.main,
+  ];
+
   const handleAddItem = () => {
-    const newItem = (items[selectedType]).find((item: Item) => item.uniqueName === selectedItem);
-    setAddedItems([...addedItems, newItem]);
+    if (!selectedType || !selectedItem) return;
+    const already = addedItems.some(item => item.uniqueName === selectedItem);
+    if (already) return;
+
+    const newItem = items[selectedType].find((item: Item) => item.uniqueName === selectedItem);
+    newItem.size = selectedSize;
+    if (newItem) setAddedItems([...addedItems, newItem]);
   };
 
   const handleSpinClick = () => {
@@ -69,113 +89,183 @@ function App() {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar>
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6">
-                Albion Online Item Roulette
-              </Typography>
-            </Box>
-            <IconButton
-              size="large"
-              edge="end"
-              color="inherit"
-              aria-label="settings"
-            >
-              <SettingsIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-      </Box>
+      <AppBar>
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Box sx={{ flexGrow: 1, textAlign: "center" }}>
+            <Typography variant="h6">
+              Albion Online Item Roulette
+            </Typography>
+          </Box>
+          <IconButton
+            size="large"
+            edge="end"
+            color="inherit"
+            aria-label="settings"
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
       <Box mt={10} />
-      <Grid container sx={{ mx: 2 }}>
-        <Grid item xs={12} md={6}>
-          <Select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            {Object.keys(items).map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-          <Select
-            value={selectedItem}
-            onChange={(e) => setSelectedItem(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            {
-              selectedItemList.map((item) => (
-                item.uniqueName && <MenuItem key={item.uniqueName} value={item.uniqueName}>
-                  {item.localizedNames[lang]}
+      <Container maxWidth="xl" sx={{ mt: 4 }}>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              {Object.keys(items).map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
                 </MenuItem>
-              ))
-            }
-          </Select>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddItem}
-          >Add</Button>
-          <List>
-            {addedItems.map((addedItem: Item) => (
-              <ListItem
-                key={addedItem.uniqueName}
-                secondaryAction={
-                  <IconButton edge="end" aria-label="delete" onClick={() => { }}>
-                    <DeleteIcon onClick={() =>
-                      setAddedItems(prev => prev.filter(item => item.uniqueName !== addedItem.uniqueName))
-                    } />
-                  </IconButton>
+              ))}
+            </Select>
+
+            <Autocomplete
+              options={selectedItemList}
+              getOptionLabel={option => option.localizedNames[lang] || option.uniqueName}
+              value={selectedItemList.find(item => item.uniqueName === selectedItem) || null}
+              onChange={(_, newValue) => setSelectedItem(newValue ? newValue.uniqueName : "")}
+              renderInput={(params) => (
+                <TextField {...params} label="Search" variant="outlined" fullWidth sx={{ mb: 2 }} />
+              )}
+              isOptionEqualToValue={(option, value) => option.uniqueName === value.uniqueName}
+            />
+
+            <TextField
+              label="Size"
+              type="number"
+              value={selectedSize}
+              onChange={(e) => {
+                const val = Math.max(1, Math.floor(Number(e.target.value) || 1));
+                setSelectedSize(val);
+              }}
+              inputProps={{
+                min: 1,
+                step: 1,
+              }}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddItem}
+            >Add</Button>
+            <Box mt={2} />
+            <Paper
+              variant="outlined"
+            >
+              <List
+                subheader={
+                  <ListSubheader>
+                    Added items
+                  </ListSubheader>
                 }
               >
-                <ListItemText primary={addedItem.localizedNames[lang]} />
-              </ListItem>
-            ))}
-          </List>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          {
-            addedItems.length ?
-            <>
-              <Wheel
-                mustStartSpinning={mustSpin}
-                prizeNumber={prizeNumber}
-                data={addedItems?.map(item => ({
-                  option: item.uniqueName,
-                  image: {
-                    uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
-                    offsetY: 100,
-                    sizeMultiplier: 1 - (addedItems.length * 0.05)
-                  },
-                }
+                {addedItems.map((addedItem: Item, idx: number) => (
+                  <>
+                    <ListItem
+                      key={addedItem.uniqueName}
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() =>
+                            setAddedItems(prev => prev.filter(item => item.uniqueName !== addedItem.uniqueName))
+                          }
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                    >
+                      <ListItemAvatar>
+                        <Avatar variant="square" alt={addedItem.localizedNames[lang]} src={`https://render.albiononline.com/v1/item/${addedItem.uniqueName}.png`} />
+                      </ListItemAvatar>
+                      <ListItemText primary={addedItem.localizedNames[lang]} />
+                      <TextField
+                        label="size"
+                        type="number"
+                        size="small"
+                        value={addedItem.size ?? 1}
+                        inputProps={{ min: 1, step: 1 }}
+                        onChange={(e) => {
+                          const newSize = Math.max(1, Math.floor(Number(e.target.value) || 1));
+                          setAddedItems(prev =>
+                            prev.map((item, i) =>
+                              i === idx ? { ...item, size: newSize } : item
+                            )
+                          );
+                        }}
+                        sx={{ width: 80, ml: 2 }}
+                      />
+                    </ListItem>
+                    {idx < addedItems.length - 1 && <Divider component="li" />}
+                  </>
                 ))}
-                onStopSpinning={() => setMustSpin(false)}
-                backgroundColors={["#ffb300", "#ef5350", "#ab47bc", "#42a5f5"]}
-                textColors={["#fff"]}
-              />
-              <Button variant="contained"
-                onClick={handleSpinClick} style={{ marginTop: "24px" }}>
-                SPIN
-              </Button>
-            </>
-          : <></>}
-        </Grid>
-      </Grid >
+              </List>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            {
+              !mustSpin && prizeNumber >= 0 ?
+                <>
+                  <Confetti width={width} height={height} numberOfPieces={180} />
+                  <Alert
+                    variant="outlined" severity="info"
+                  >
+                    {addedItems[prizeNumber]?.localizedNames[lang]}
+                  </Alert>
+                </>
+                : <></>
+            }
+            {
+              addedItems.length ?
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  width="100%"
+                >
+                  <Wheel
+                    mustStartSpinning={mustSpin}
+                    prizeNumber={prizeNumber}
+                    data={addedItems?.map(item => ({
+                      option: item.uniqueName,
+                      image: {
+                        uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
+                        offsetY: 100,
+                        sizeMultiplier: 1 - (addedItems.length * 0.05)
+                      },
+                      optionSize: item.size
+                    }
+                    ))}
+                    onStopSpinning={() => setMustSpin(false)}
+                    backgroundColors={backgroundColors}
+                    textColors={["#fff"]}
+                  />
+                  <Button variant="contained"
+                    onClick={handleSpinClick} style={{ marginTop: "24px" }}>
+                    SPIN
+                  </Button>
+                </Box>
+                : <></>
+            }
+          </Grid>
+        </Grid >
+      </Container>
     </>
   );
 }
