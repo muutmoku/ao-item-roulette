@@ -18,19 +18,22 @@ const defaultItems: Items = {
 
 const lang = 'JA-JP';
 
-type Item = { uniqueName: string;[key: string]: any };
+type Item = {
+  uniqueName: string;[key: string]: any
+};
 
 function App() {
   const [items, setItems] = useState<any>(defaultItems);
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
-  const [addedItems, setAddedItems] = useState<string[]>([]);
+  const [addedItems, setAddedItems] = useState<Item[]>([]);
   const [selectedItemList, setselectedItemList] = useState<Item[]>([]);
   const [selectedType, setSelectedType] = useState<any>([]);
   const [selectedItem, setSelectedItem] = useState<any>("");
-
+  
   const handleAddItem = () => {
-    setAddedItems([...addedItems, selectedItem]);
+    const newItem = (items[selectedType]).find((item: Item) => item.uniqueName === selectedItem);
+    setAddedItems([...addedItems, newItem]);
   };
 
   const handleSpinClick = () => {
@@ -129,18 +132,18 @@ function App() {
             onClick={handleAddItem}
           >Add</Button>
           <List>
-            {addedItems.map((addedItem: string) => (
+            {addedItems.map((addedItem: Item) => (
               <ListItem
-                key={addedItem}
+                key={addedItem.uniqueName}
                 secondaryAction={
                   <IconButton edge="end" aria-label="delete" onClick={() => { }}>
                     <DeleteIcon onClick={() =>
-                      setAddedItems(prev => prev.filter(item => item !== addedItem))
+                      setAddedItems(prev => prev.filter(item => item.uniqueName !== addedItem.uniqueName))
                     } />
                   </IconButton>
                 }
               >
-                <ListItemText primary={addedItem} />
+                <ListItemText primary={addedItem.localizedNames[lang]} />
               </ListItem>
             ))}
           </List>
@@ -153,9 +156,9 @@ function App() {
                 mustStartSpinning={mustSpin}
                 prizeNumber={prizeNumber}
                 data={addedItems?.map(item => ({
-                  option: item,
+                  option: item.uniqueName,
                   image: {
-                    uri: `https://render.albiononline.com/v1/item/${item}.png`,
+                    uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
                     offsetY: 100,
                     sizeMultiplier: 1 - (addedItems.length * 0.05)
                   },
