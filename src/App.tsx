@@ -144,13 +144,10 @@ function App() {
               </ListItem>
             ))}
           </List>
-          <pre style={{ fontSize: "1.5rem" }}>
-            {JSON.stringify(items, null, 2)}
-          </pre>
         </Grid>
         <Grid item xs={12} md={6}>
           {
-            addedItems.length &&
+            addedItems.length ?
             <>
               <Wheel
                 mustStartSpinning={mustSpin}
@@ -173,7 +170,7 @@ function App() {
                 SPIN
               </Button>
             </>
-          }
+          : <></>}
         </Grid>
       </Grid >
     </>

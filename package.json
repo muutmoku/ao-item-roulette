@@ -2,6 +2,7 @@
   "name": "ao-item-roulette",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://muutmoku.github.io/ao-item-roulette",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
