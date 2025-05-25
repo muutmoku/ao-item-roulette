@@ -15,6 +15,7 @@ import {
   ListItemAvatar,
   Avatar,
   Select,
+  Menu,
   MenuItem,
   List,
   ListItem,
@@ -27,6 +28,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { Wheel } from "react-custom-roulette";
@@ -54,8 +56,23 @@ const defaultItems: Items = {
   potion: {},
   shoes: {},
 };
-
-const lang = "JA-JP";
+const languages = [
+  { code: "EN-US", label: "🇺🇸" },
+  { code: "JA-JP", label: "🇯🇵" },
+  { code: "DE-DE", label: "🇩🇪" },
+  { code: "FR-FR", label: "🇫🇷" },
+  { code: "IT-IT", label: "🇮🇹" },
+  { code: "RU-RU", label: "🇷🇺" },
+  { code: "PL-PL", label: "🇵🇱" },
+  { code: "TR-TR", label: "🇹🇷" },
+  { code: "ID-ID", label: "🇮🇩" },
+  { code: "AR-SA", label: "🇸🇦" },
+  { code: "KO-KR", label: "🇰🇷" },
+  { code: "PT-BR", label: "🇧🇷" },
+  { code: "ZH-TW", label: "🇹🇼" },
+  { code: "ZH-CN", label: "🇨🇳" },
+  { code: "ES-ES", label: "🇪🇸" },
+];
 
 type Item = {
   uniqueName: string;
@@ -71,6 +88,9 @@ function App() {
   const [selectedType, setSelectedType] = useState<any>([]);
   const [selectedItem, setSelectedItem] = useState<any>("");
   const [selectedSize, setSelectedSize] = useState<number>(1);
+  const [menuEl, setMenuEl] = useState<null | HTMLElement>(null);
+  const [gearEl, setGearEl] = useState<null | HTMLElement>(null);
+  const [languageEl, setLanguageEl] = useState<null | HTMLElement>(null);
   const { width, height } = useWindowSize();
 
   const theme = useTheme();
@@ -100,6 +120,25 @@ function App() {
     setPrizeNumber(rand);
     setMustSpin(true);
   };
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuEl(null);
+  };
+  const handleGearOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setGearEl(event.currentTarget);
+  };
+
+  const handleGearClose = () => {
+    setGearEl(null);
+  };
+  const handleLanguageOpen = (e: React.MouseEvent<HTMLElement>) =>
+    setLanguageEl(e.currentTarget);
+  const handleLanguageClose = () => setLanguageEl(null);
+  const [lang, setLang] = useState("JA-JP");
+  console.log(languageEl);
 
   useEffect(() => {
     setselectedItemList(items[selectedType] || []);
@@ -136,9 +175,48 @@ function App() {
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
+            onClick={handleMenuOpen}
           >
             <MenuIcon />
           </IconButton>
+          <Menu
+            anchorEl={menuEl}
+            open={Boolean(menuEl)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem
+              component="a"
+              href="https://muutmoku.github.io/ao-item-roulette/"
+            >
+              Albion Online Item Roulette
+            </MenuItem>
+            <MenuItem
+              component="a"
+              href="https://muutmoku.github.io/ao-guild-viewer//"
+            >
+              Albion Online Guild Viewer
+            </MenuItem>
+            <MenuItem
+              component="a"
+              href="https://muutmoku.github.io/ao-build-share/"
+            >
+              Albion Online Build Share
+            </MenuItem>
+            <MenuItem
+              component="a"
+              href="https://muutmoku.github.io/ao-item-snapshot/"
+            >
+              Albion Online Item Snapshot
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              component="a"
+              href="https://twitch.com/muutmoku"
+              target="_blank"
+            >
+              Author's Twitch
+            </MenuItem>
+          </Menu>
           <Box sx={{ flexGrow: 1, textAlign: "center" }}>
             <Typography variant="h6">Albion Online Item Roulette</Typography>
           </Box>
@@ -147,9 +225,39 @@ function App() {
             edge="end"
             color="inherit"
             aria-label="settings"
+            onClick={handleGearOpen}
           >
             <SettingsIcon />
           </IconButton>
+          <Menu
+            anchorEl={gearEl}
+            open={Boolean(gearEl)}
+            onClose={handleGearClose}
+          >
+            <MenuItem onClick={handleLanguageOpen}>
+              Language
+              <ArrowRightIcon />
+            </MenuItem>
+          </Menu>
+          <Menu
+            anchorEl={languageEl}
+            open={Boolean(languageEl)}
+            onClose={handleLanguageClose}
+          >
+            {languages.map((option) => (
+              <MenuItem
+                key={option.code}
+                selected={lang === option.code}
+                onClick={() => {
+                  setLang(option.code);
+                  handleLanguageClose();
+                  handleGearClose();
+                }}
+              >
+                <span style={{ marginRight: 8 }}>{option.label}</span>
+              </MenuItem>
+            ))}
+          </Menu>
         </Toolbar>
       </AppBar>
       <Box mt={10} />
@@ -168,7 +276,6 @@ function App() {
                 </MenuItem>
               ))}
             </Select>
-
             <Autocomplete
               options={selectedItemList}
               getOptionLabel={(option) =>
