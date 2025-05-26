@@ -29,8 +29,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import Confetti from "react-confetti";
-import { useWindowSize } from "react-use";
 import { Wheel } from "react-custom-roulette";
 
 export type Items = {
@@ -79,6 +77,19 @@ type Item = {
   [key: string]: any;
 };
 
+const RADIUS = 180;
+const IMAGE_SIZE = 217;
+
+const getSizeMultiplier = (radius: number, itemsCount: number) => {
+  let base = IMAGE_SIZE > radius * 0.9 ? (radius * 0.9) / IMAGE_SIZE : 1;
+  base *= 1 - itemsCount * 0.04;
+  return base;
+};
+
+const getOffsetY = (radius: number, drawSize: number) => {
+  return radius - drawSize / 3;
+};
+
 function App() {
   const [items, setItems] = useState<any>(defaultItems);
   const [mustSpin, setMustSpin] = useState(false);
@@ -91,7 +102,6 @@ function App() {
   const [menuEl, setMenuEl] = useState<null | HTMLElement>(null);
   const [gearEl, setGearEl] = useState<null | HTMLElement>(null);
   const [languageEl, setLanguageEl] = useState<null | HTMLElement>(null);
-  const { width, height } = useWindowSize();
 
   const theme = useTheme();
   const backgroundColors = [
@@ -138,7 +148,6 @@ function App() {
     setLanguageEl(e.currentTarget);
   const handleLanguageClose = () => setLanguageEl(null);
   const [lang, setLang] = useState("JA-JP");
-  console.log(languageEl);
 
   useEffect(() => {
     setselectedItemList(items[selectedType] || []);
@@ -163,6 +172,7 @@ function App() {
       setItems(newItems);
     };
     fetchAllItems();
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -390,7 +400,6 @@ function App() {
           <Grid item xs={12} md={6}>
             {!mustSpin && prizeNumber >= 0 ? (
               <>
-                <Confetti width={width} height={height} numberOfPieces={180} />
                 <Alert variant="outlined" severity="info">
                   {addedItems[prizeNumber]?.localizedNames[lang]}
                 </Alert>
@@ -408,15 +417,25 @@ function App() {
                 <Wheel
                   mustStartSpinning={mustSpin}
                   prizeNumber={prizeNumber}
-                  data={addedItems?.map((item) => ({
-                    option: item.uniqueName,
-                    image: {
-                      uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
-                      offsetY: 100,
-                      sizeMultiplier: 1 - addedItems.length * 0.05,
-                    },
-                    optionSize: item.size,
-                  }))}
+                  data={addedItems?.map((item, r, arr) => {
+                    const sizeMultiplier = getSizeMultiplier(
+                      RADIUS,
+                      arr.length,
+                    );
+                    const drawSize = IMAGE_SIZE * sizeMultiplier;
+                    return {
+                      option: item.localizedNames[lang],
+                      style: {
+                        fontSize: 7,
+                      },
+                      image: {
+                        uri: `https://render.albiononline.com/v1/item/${item.uniqueName}.png`,
+                        offsetY: getOffsetY(RADIUS, drawSize),
+                        sizeMultiplier,
+                      },
+                      optionSize: item.size,
+                    };
+                  })}
                   onStopSpinning={() => setMustSpin(false)}
                   backgroundColors={backgroundColors}
                   textColors={["#fff"]}
