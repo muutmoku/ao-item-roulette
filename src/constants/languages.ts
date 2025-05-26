@@ -1,0 +1,17 @@
+export const languages = [
+  { code: "EN-US", label: "🇺🇸" },
+  { code: "JA-JP", label: "🇯🇵" },
+  { code: "DE-DE", label: "🇩🇪" },
+  { code: "FR-FR", label: "🇫🇷" },
+  { code: "IT-IT", label: "🇮🇹" },
+  { code: "RU-RU", label: "🇷🇺" },
+  { code: "PL-PL", label: "🇵🇱" },
+  { code: "TR-TR", label: "🇹🇷" },
+  { code: "ID-ID", label: "🇮🇩" },
+  { code: "AR-SA", label: "🇸🇦" },
+  { code: "KO-KR", label: "🇰🇷" },
+  { code: "PT-BR", label: "🇧🇷" },
+  { code: "ZH-TW", label: "🇹🇼" },
+  { code: "ZH-CN", label: "🇨🇳" },
+  { code: "ES-ES", label: "🇪🇸" },
+];

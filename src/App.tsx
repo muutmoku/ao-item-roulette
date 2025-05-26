@@ -30,6 +30,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { Wheel } from "react-custom-roulette";
+import { languages } from "./constants/languages";
+import { useLang } from "./context/LanguageContext";
 
 export type Items = {
   armor: {};
@@ -54,23 +56,6 @@ const defaultItems: Items = {
   potion: {},
   shoes: {},
 };
-const languages = [
-  { code: "EN-US", label: "🇺🇸" },
-  { code: "JA-JP", label: "🇯🇵" },
-  { code: "DE-DE", label: "🇩🇪" },
-  { code: "FR-FR", label: "🇫🇷" },
-  { code: "IT-IT", label: "🇮🇹" },
-  { code: "RU-RU", label: "🇷🇺" },
-  { code: "PL-PL", label: "🇵🇱" },
-  { code: "TR-TR", label: "🇹🇷" },
-  { code: "ID-ID", label: "🇮🇩" },
-  { code: "AR-SA", label: "🇸🇦" },
-  { code: "KO-KR", label: "🇰🇷" },
-  { code: "PT-BR", label: "🇧🇷" },
-  { code: "ZH-TW", label: "🇹🇼" },
-  { code: "ZH-CN", label: "🇨🇳" },
-  { code: "ES-ES", label: "🇪🇸" },
-];
 
 type Item = {
   uniqueName: string;
@@ -102,6 +87,7 @@ function App() {
   const [menuEl, setMenuEl] = useState<null | HTMLElement>(null);
   const [gearEl, setGearEl] = useState<null | HTMLElement>(null);
   const [languageEl, setLanguageEl] = useState<null | HTMLElement>(null);
+  const { lang, setLang } = useLang();
 
   const theme = useTheme();
   const backgroundColors = [
@@ -147,7 +133,6 @@ function App() {
   const handleLanguageOpen = (e: React.MouseEvent<HTMLElement>) =>
     setLanguageEl(e.currentTarget);
   const handleLanguageClose = () => setLanguageEl(null);
-  const [lang, setLang] = useState("JA-JP");
 
   useEffect(() => {
     setselectedItemList(items[selectedType] || []);
